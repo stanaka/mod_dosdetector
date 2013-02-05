@@ -4,6 +4,15 @@ mod_dosdetector
 An apache module for detecting DoS attacks.
 When detecting DoS attacks, this module set environment variables. Note that this module itself does not affect the response.
 
+Install
+-------
+
+Just do make install
+
+```
+make install
+```
+
 Configuration
 -------------
 
