@@ -65,6 +65,10 @@
 #define DEFAULT_BAN_PERIOD 300
 #define DEFAULT_TABLE_SIZE 100
 
+#if (AP_SERVER_MINORVERSION_NUMBER > 2)
+static const char *DefaultContentType = "text/plain";
+#endif
+
 module AP_MODULE_DECLARE_DATA dosdetector_module;
 
 struct s_client {
@@ -260,7 +264,13 @@ static int dosdetector_handler(request_rec *r)
     int i;
 
     content_type = ap_sub_req_lookup_uri(r->uri, r, NULL)->content_type;
-    if (!content_type) content_type = ap_default_type(r);
+    if (!content_type) {
+#if (AP_SERVER_MINORVERSION_NUMBER > 2)
+        content_type = DefaultContentType;
+#else
+        content_type = ap_default_type(r);
+#endif
+    }
 
 	if (cfg->forwarded){
 		if ((address_tmp = apr_table_get(r->headers_in, "X-Forwarded-For")) != NULL){
@@ -271,7 +281,7 @@ static int dosdetector_handler(request_rec *r)
 		}
 	}
 	if (address == NULL)
-		address = r->connection->remote_ip;
+		address = r->connection->client_ip;
 
     ap_regmatch_t regmatch[AP_MAX_REG_MATCH];
     ap_regex_t **contenttype_regexp = (ap_regex_t **) cfg->contenttype_regexp->elts;
@@ -285,7 +295,7 @@ static int dosdetector_handler(request_rec *r)
 
 	struct in_addr addr;
 	if(!cfg->forwarded)
-		addr = r->connection->remote_addr->sa.sin.sin_addr;
+		addr = r->connection->client_addr->sa.sin.sin_addr;
 	if(cfg->forwarded || addr.s_addr == 0){
 		if (inet_aton(address, &addr) == 0) {
 			TRACELOG("dosdetector: '%s' is not  a valid IP addresss", address);
