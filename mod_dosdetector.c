@@ -142,7 +142,7 @@ static void create_shm(server_rec *s,apr_pool_t *p)
 	size =  sizeof(client_list_t) + table_size * sizeof(client_t);
 
     ap_log_error(APLOG_MARK, APLOG_STARTUP, 0, NULL, 
-				 "Create or Joining shmem. name: %s, size: %d", shmname, size);
+				 "Create or Joining shmem. name: %s, size: %zd", shmname, size);
     if(lock) apr_global_mutex_lock(lock);
     apr_status_t rc = apr_shm_attach(&shm, shmname, p);
     if (APR_SUCCESS != rc) {
